@@ -69,7 +69,9 @@ function populateIsDeployingContractsToMainNetOnce(hre) {
 	// But this logic doesn't evaluate what task we are executing.
 	// Remember that there are 2 possible deployment tasks: "deploy" and "ignition deploy".
 	// Any more sophisticated logic would need to be perpared for the case when a deployment happens without a recompile.
+	// That said, it's really better to not make this logic any more complicated -- to stay on the safe side.
 	switch(hre.network.name) {
+		case "hardhat":
 		case "rinkeby":
 		case "arbigoerli":
 		case "sepolia":
@@ -133,7 +135,8 @@ function preProcessSolidityLine(hre, line) {
 		populateIsDeployingContractsToMainNetOnce(hre);
 
 		if (isDeployingContractsToMainNet) {
-			throw new Error("You forgot to disable assertions or SMTChecker.");
+			// throw new Error("You forgot to disable assertions or SMTChecker.");
+			throw new Error("You forgot to disable Hardhat Preprocessor.");
 		}
 	}
 
@@ -169,20 +172,46 @@ function preProcessSolidityLine(hre, line) {
 			},
 		},
 
+		networks: {
+			rinkeby: {
+				url: `https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161`,
+				accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+			},
+			arbigoerli: {
+				url: `https://goerli-rollup.arbitrum.io/rpc`,
+				accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+			},
+			arbitrum: {
+				url: `https://arb1.arbitrum.io/rpc`,
+				accounts: process.env.MAINNET_PRIVATE_KEY !== undefined ? [process.env.MAINNET_PRIVATE_KEY] : [],
+			},
+			sepolia: {
+				url: `http://170.187.142.12:22545/`,
+				accounts: process.env.SEPOLIA_PRIVATE_KEY !== undefined ? [process.env.SEPOLIA_PRIVATE_KEY] : [],
+				gasMultiplier: 2,
+			},
+			localhost: {
+				url: `http://localhost:8545/`,
+				gasMultiplier: 4,
+			},
+		},
+
 		// "hardhat-preprocessor" package configuration.
 		preprocess: {
 			eachLine:
 				(hre) =>
 				(
 					{
-						// Contracts will be recompiled only when this object changes.
-						// Issue. At least that's what the docs says. But this doesn't appear to work as I would expect,
-						// given that the preprocessor always gets executed.
-						settings:
-						{
-							enableAssertions: enableAssertions,
-							enableSMTChecker: enableSMTChecker,
-						},
+						// // Contracts will be recompiled only when this object changes.
+						// // Issue. At least that's what the docs says. But this doesn't appear to work as I would expect,
+						// // given that the preprocessor always gets executed.
+						// // Actualy let's comment this out. We want Hardhat Preprocessor to always run and throw an error
+						// // if the user is trying to deploy to a mainnet.
+						// settings:
+						// {
+						// 	enableAssertions: enableAssertions,
+						// 	enableSMTChecker: enableSMTChecker,
+						// },
 
 						// // This undocumented parameter appears to make it possible to specify what files to preprocess.
 						// // It appears to be unnecessary to configure this.
