@@ -31,10 +31,14 @@ const enableSMTChecker = true;
 // #endregion
 // #region
 
-if ( ! enableHardhatPreProcessor ) {
+if (enableHardhatPreProcessor) {
+	console.warn("Hardhat Preprocessor is ENABLED. Assuming it's intentional.");
+
+	if (enableSMTChecker && ( ! enableAssertions )) {
+		console.warn("SMTChecker is enabled, but assertions are not. Is it intentional?");
+	}
+} else {
 	console.warn("Hardhat Preprocessor is disabled. Assuming it's intentional.");
-} else if (enableSMTChecker && ( ! enableAssertions )) {
-	console.warn("SMTChecker is enabled, but assertions are not. Is it intentional?");
 }
 
 // #endregion
@@ -124,7 +128,7 @@ function createSolidityLinePreProcessingRegExp()
 function preProcessSolidityLine(hre, line) {
 	// todo-0 In the production project, try to execute this validation before the preprocessor gets a chance to run.
 	// todo-0 But maybe do nothing if the preprocessor is disabled.
-	if (enableAssertions || enableSMTChecker)
+	// if (enableAssertions || enableSMTChecker)
 	{
 		populateIsDeployingContractsToMainNetOnce(hre);
 
