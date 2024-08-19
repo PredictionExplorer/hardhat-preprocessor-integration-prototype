@@ -206,7 +206,7 @@ function preProcessSolidityLine(hre, line) {
 						// // Issue. At least that's what the docs says. But this doesn't appear to work as I would expect,
 						// // given that the preprocessor always gets executed.
 						// // Actualy let's comment this out. We want Hardhat Preprocessor to always run and throw an error
-						// // if the user is trying to deploy to a mainnet.
+						// // if the user appears to be trying to deploy to a mainnet.
 						// settings:
 						// {
 						// 	enableAssertions: enableAssertions,
