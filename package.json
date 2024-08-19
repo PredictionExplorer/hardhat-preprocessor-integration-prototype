@@ -1,0 +1,17 @@
+{
+	"name": "hardhat-preprocessor-integration-prototype",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "CC0-1.0",
+	"description": "",
+	"devDependencies": {
+		"@nomicfoundation/hardhat-toolbox": "^5.0.0",
+		"hardhat": "^2.22.8",
+		"hardhat-preprocessor": "^0.1.5"
+	}
+}
