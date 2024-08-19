@@ -100,9 +100,9 @@ function populateIsDeployingContractsToMainNetOnce(hre) {
 // #endregion
 // #region
 
-const solidityLinePreProcessingRegExp = enableHardhatPreProcessor ? CreateSolidityLinePreProcessingRegExp() : undefined;
+const solidityLinePreProcessingRegExp = enableHardhatPreProcessor ? createSolidityLinePreProcessingRegExp() : undefined;
 
-function CreateSolidityLinePreProcessingRegExp()
+function createSolidityLinePreProcessingRegExp()
 {
 	const regExpPatternPart1 =
 		(enableAssertions ? "enableAssertions" : "disableAssertions") +
