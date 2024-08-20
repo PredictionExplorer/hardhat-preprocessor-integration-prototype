@@ -32,13 +32,13 @@ const enableSMTChecker = true;
 // #region
 
 if (enableHardhatPreProcessor) {
-	console.warn("Hardhat Preprocessor is ENABLED. Assuming it's intentional.");
+	console.warn("Warning. Hardhat Preprocessor is ENABLED. Assuming it's intentional.");
 
 	if (enableSMTChecker && ( ! enableAssertions )) {
-		console.warn("SMTChecker is enabled, but assertions are not. Is it intentional?");
+		console.warn("Warning. SMTChecker is enabled, but assertions are not. Is it intentional?");
 	}
 } else {
-	console.warn("Hardhat Preprocessor is disabled. Assuming it's intentional.");
+	console.warn("Warning. Hardhat Preprocessor is disabled. Assuming it's intentional.");
 }
 
 // #endregion
@@ -147,7 +147,7 @@ function preProcessSolidityLine(hre, line) {
 	// @ts-ignore No overload matches this call.
 	line = line.replace(solidityLinePreProcessingRegExp, "$1");
 
-	console.log(line);
+	// console.log(line);
 	return line;
 }
 
@@ -207,6 +207,7 @@ function preProcessSolidityLine(hre, line) {
 						// // given that the preprocessor always gets executed.
 						// // Actualy let's comment this out. We want Hardhat Preprocessor to always run and throw an error
 						// // if the user appears to be trying to deploy to a mainnet.
+						// // todo-0 But revisit this in the production code.
 						// settings:
 						// {
 						// 	enableAssertions: enableAssertions,
@@ -247,11 +248,12 @@ function preProcessSolidityLine(hre, line) {
 			// // See https://docs.soliditylang.org/en/latest/smtchecker.html#division-and-modulo-with-slack-variables
 			// divModNoSlacks: ...
 
-			// // By default, all model checking engines will run, which is probably the best option.
-			// // See https://docs.soliditylang.org/en/latest/smtchecker.html#model-checking-engines
-			// // See https://docs.soliditylang.org/en/latest/smtchecker.html#bounded-model-checker-bmc
-			// // See https://docs.soliditylang.org/en/latest/smtchecker.html#constrained-horn-clauses-chc
-			// engine: "all",
+			// By default, all model checking engines will run, which is probably the best option.
+			// Issue. Actually, without this being configured explicitly, SMTChecker doesn't appear to run.
+			// See https://docs.soliditylang.org/en/latest/smtchecker.html#model-checking-engines
+			// See https://docs.soliditylang.org/en/latest/smtchecker.html#bounded-model-checker-bmc
+			// See https://docs.soliditylang.org/en/latest/smtchecker.html#constrained-horn-clauses-chc
+			engine: "all",
 
 			// When we make an external call like `Contract1(address1).function1()`, SMTChecker will, by default, expect that
 			// we are calling into potentially malicious code.
