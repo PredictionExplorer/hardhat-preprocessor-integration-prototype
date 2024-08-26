@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 // Comment-202408174 applies.
 // #enableAssertions import "hardhat/console.sol";
@@ -93,11 +93,13 @@ contract Lock {
 	function function4() public pure {
 	}
 
+	/*
 	/// @notice As of Aug 2024, this feature is still under development.
 	/// See https://docs.soliditylang.org/en/latest/smtchecker.html#natspec-function-abstraction
 	/// @custom:smtchecker abstract-function-uf
 	function function5() public pure {
 	}
+	*/
 
 	// #endregion
 }

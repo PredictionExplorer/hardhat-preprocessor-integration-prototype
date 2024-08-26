@@ -28,6 +28,19 @@ const enableAssertions = true;
 // todo-0 Should we take this from an environmemt variable?
 const enableSMTChecker = true;
 
+// Issue. Hardhat would automatically install solcjs, but solcjs doesn't appear to support SMTChecker.
+// It could be a solcjs bug.
+// So we are telling Hardhat to use the native solc of the given version.
+// Remember to manually install it.
+// The simplest option is to install the solc package globally.
+// Another option is to use the "solc-select" tool.
+// Remember that depending on how your system upates are configured and how you installed the solc package,
+// the package can be updated at any moment, so it's recommended to disable automatic quiet updates.
+// Hardhat will not necesarily validate what version it's executing.
+const solidityCompilerPath = "/usr/bin/solc";
+const solidityVersion = "0.8.26";
+const solidityCompilerLongVersion = solidityVersion + "+commit.8a97fa7a.Linux.g++";
+
 // #endregion
 // #region
 
@@ -41,10 +54,14 @@ if (enableHardhatPreProcessor) {
 	console.warn("Warning. Hardhat Preprocessor is disabled. Assuming it's intentional.");
 }
 
+console.warn(`Make sure "${solidityCompilerPath}" version is "${solidityCompilerLongVersion}".`);
+
 // #endregion
 // #region
 
 require("@nomicfoundation/hardhat-toolbox");
+const { subtask } = require("hardhat/config");
+const { TASK_COMPILE_SOLIDITY_GET_SOLC_BUILD, } = require("hardhat/builtin-tasks/task-names");
 
 if (enableHardhatPreProcessor) {
 	require("hardhat-preprocessor");
@@ -65,7 +82,8 @@ function populateIsDeployingContractsToMainNetOnce(hre) {
 	}
 
 	// To be safe, checking if the network is a known testnet. Otherwise we will suspect that it could be a mainnet.
-	// Issue. When we are executing a non-deployment task, at least in some cases, should we avoid throwing an error?
+	// Issue. When we are executing a non-deployment task, at least in some cases, should we avoid throwing an error
+	// near Comment-202408261?
 	// But this logic doesn't evaluate what task we are executing.
 	// Remember that there are 2 possible deployment tasks: "deploy" and "ignition deploy".
 	// Any more sophisticated logic would need to be perpared for the case when a deployment happens without a recompile.
@@ -86,6 +104,31 @@ function populateIsDeployingContractsToMainNetOnce(hre) {
 		}
 	}
 }
+
+// #endregion
+// #region
+
+subtask(
+	TASK_COMPILE_SOLIDITY_GET_SOLC_BUILD,
+	async (args, hre, runSuper) => {
+		if (args.solcVersion === solidityVersion) {
+			return {
+				compilerPath: solidityCompilerPath,
+				isSolcJs: false,
+				version: solidityVersion,
+
+				// This is used as extra information in the build-info files, but other than that is not important.
+				longVersion: solidityCompilerLongVersion,
+			};
+		}
+	
+		// This point is supposed to be unreachable.
+		throw new Error(`Hardhat is trying to use a wrong Solidity compiler version: "${args.solcVersion}".`);
+
+		// // Calling the default subtask.
+		// return runSuper();
+ 	}
+);
 
 // #endregion
 // #region Solidity line preprocessing prototype.
@@ -135,7 +178,8 @@ function preProcessSolidityLine(hre, line) {
 		populateIsDeployingContractsToMainNetOnce(hre);
 
 		if (isDeployingContractsToMainNet) {
-			// throw new Error("You forgot to disable assertions or SMTChecker.");
+			// [Comment-202408261/]
+			// throw new Error("You forgot to disable assertions and/or SMTChecker.");
 			throw new Error("You forgot to disable Hardhat Preprocessor.");
 		}
 	}
@@ -160,7 +204,7 @@ function preProcessSolidityLine(hre, line) {
 	/** @type import("hardhat/config").HardhatUserConfig */
 	const hardhatUserConfig = {
 		solidity: {
-			version: "0.8.24",
+			version: solidityVersion,
 
 			settings: {
 				evmVersion: "cancun",
@@ -202,17 +246,18 @@ function preProcessSolidityLine(hre, line) {
 				(hre) =>
 				(
 					{
-						// // Contracts will be recompiled only when this object changes.
-						// // Issue. At least that's what the docs says. But this doesn't appear to work as I would expect,
-						// // given that the preprocessor always gets executed.
-						// // Actualy let's comment this out. We want Hardhat Preprocessor to always run and throw an error
-						// // if the user appears to be trying to deploy to a mainnet.
-						// // todo-0 But revisit this in the production code.
-						// settings:
-						// {
-						// 	enableAssertions: enableAssertions,
-						// 	enableSMTChecker: enableSMTChecker,
-						// },
+						// In case the preprocessor is disabled, it doesn't matter whether this object exists or changed.
+						// In that case, Hardhat will recompile only modified contracts, which is the normal behavior if Hardhat.
+						// Further comments apply if the preprocesor is enabled.
+						// Regardless if this object exists or changed, Hardhat will unconditionally execute the preprocesor.
+						// As a result, the logic that can lead to an error being thrown near Comment-202408261 is guaranteed to run.
+						// If this object doesn't exist or if it changed, Hardhat will unconditionally recompile all contracts.
+						// Otherwise, if the preprocessor generats a different output, Hardhat will recompile the changed contracts.
+						settings:
+						{
+							enableAssertions: enableAssertions,
+							enableSMTChecker: enableSMTChecker,
+						},
 
 						// // This undocumented parameter appears to make it possible to specify what files to preprocess.
 						// // It appears to be unnecessary to configure this.
@@ -274,9 +319,8 @@ function preProcessSolidityLine(hre, line) {
 			// // todo-0 Do we need this?
 			// showProved: true,
 
-			// // See https://docs.soliditylang.org/en/latest/smtchecker.html#unproved-targets
-			// // todo-0 Do we need this?
-			// showUnproved: true,
+			// See https://docs.soliditylang.org/en/latest/smtchecker.html#unproved-targets
+			showUnproved: true,
 
 			// See https://docs.soliditylang.org/en/latest/smtchecker.html#unsupported-language-features
 			showUnsupported: true,
@@ -302,7 +346,8 @@ function preProcessSolidityLine(hre, line) {
 			],
 
 			// Milliseconds.
-			timeout: 100000,
+			// timeout: 1 * 1000,
+			timeout: 999 * 1000,
 		};
 	}
 
