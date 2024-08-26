@@ -65,8 +65,8 @@ contract Lock {
 
 	// #enableSMTChecker /// @notice This function exists solely for SMTChecker to analyze.
 	// #enableSMTChecker function testMonotonicFunction(uint256 a, uint256 b) public pure {
-	// #enableSMTChecker     require(b > a);
-	// #enableSMTChecker     assert(monotonicFunction(b) > monotonicFunction(a));
+	// #enableSMTChecker 	require(b > a);
+	// #enableSMTChecker 	assert(monotonicFunction(b) > monotonicFunction(a));
 	// #enableSMTChecker }
 
 	function function2() public view {
