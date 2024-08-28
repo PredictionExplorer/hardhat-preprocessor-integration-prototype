@@ -28,15 +28,17 @@ const enableAssertions = true;
 // todo-0 Should we take this from an environmemt variable?
 const enableSMTChecker = true;
 
-// Issue. Hardhat would automatically install solcjs, but solcjs doesn't appear to support SMTChecker.
+// Issue. Hardhat would automatically install solcjs, but solcjs fails to execute SMTChecker.
 // It could be a solcjs bug.
 // So we are telling Hardhat to use the native solc of the given version.
 // Remember to manually install it.
-// The simplest option is to install the solc package globally.
+// The simplest option is to install the solc package globally:
+//    sudo add-apt-repository ppa:ethereum/ethereum
+//    sudo apt install solc
 // Another option is to use the "solc-select" tool.
 // Remember that depending on how your system upates are configured and how you installed the solc package,
-// the package can be updated at any moment, so it's recommended to disable automatic quiet updates.
-// Hardhat will not necesarily validate what version it's executing.
+// the package can be updated at any moment, so you might want to disable automatic quiet updates.
+// Hardhat will not necesarily validate solc of what version it's executing.
 const solidityCompilerPath = "/usr/bin/solc";
 const solidityVersion = "0.8.26";
 const solidityCompilerLongVersion = solidityVersion + "+commit.8a97fa7a.Linux.g++";
@@ -315,9 +317,9 @@ function preProcessSolidityLine(hre, line) {
 			// See https://docs.soliditylang.org/en/latest/smtchecker.html#reported-inferred-inductive-invariants
 			invariants: ["contract", "reentrancy",],
 
+			// // We probably don't need this.
 			// // See https://docs.soliditylang.org/en/latest/smtchecker.html#proved-targets
-			// // todo-0 Do we need this?
-			// showProved: true,
+			// showProvedSafe: true,
 
 			// See https://docs.soliditylang.org/en/latest/smtchecker.html#unproved-targets
 			showUnproved: true,
@@ -346,8 +348,7 @@ function preProcessSolidityLine(hre, line) {
 			],
 
 			// Milliseconds.
-			// timeout: 1 * 1000,
-			timeout: 999 * 1000,
+			timeout: 9999 * 1000,
 		};
 	}
 

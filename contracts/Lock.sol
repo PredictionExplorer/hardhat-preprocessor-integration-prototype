@@ -2,8 +2,10 @@
 
 pragma solidity ^0.8.26;
 
+/*
 // Comment-202408174 applies.
 // #enableAssertions import "hardhat/console.sol";
+*/
 
 contract Lock {
 	// #region Hardhat Generated Code
@@ -75,11 +77,14 @@ contract Lock {
 		// #disableAssertions require
 			(owner != address(0));
 
+/*
 		// [Comment-202408174]
 		// It makes sense to keep assertions enabled during development.
 		// So we can log something if assertions are enabled.
+		// But I have commented this out for now because the console code takes long for SMTChecker to analyze.
 		// [/Comment-202408174]
 		// #enableAssertions console.log(unlockTime);
+*/
 	}
 
 	// #disableSMTChecker /*
