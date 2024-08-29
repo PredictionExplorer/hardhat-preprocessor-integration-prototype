@@ -92,17 +92,24 @@ contract Lock {
 			unlockTimeCopy = unlockTime;
 		}
 
-		++ unlockTime;
+		unchecked { unlockTime += block.timestamp; }
 
 		if(AssertionsHelpers.ENABLE_ASSERTIONS) {
 			// assert(unlockTimeCopy <= block.timestamp);
+			assert(unlockTimeCopy > block.timestamp);
+			unlockTimeCopy = unlockTime;
+		}
+
+		++ unlockTime;
+
+		if(AssertionsHelpers.ENABLE_ASSERTIONS) {
 			assert(unlockTimeCopy > block.timestamp);
 		}
 
 		return unlockTime;
 	}
 
-	function function3() public view {
+	function function4() public view {
 		// This kind of notation would be incorrect if we disable Hardhat Preprocessor.
 		// #enableAssertions assert
 		// #disableAssertions require
@@ -120,13 +127,13 @@ contract Lock {
 
 	// #disableSMTChecker /*
 	/// @notice Hardhat Preprocessor can comment out this function.
-	function function4() public pure {
+	function function5() public pure {
 	}
 	// #disableSMTChecker */
 
 	/// @notice See https://docs.soliditylang.org/en/latest/smtchecker.html#natspec-function-abstraction
 	/// @custom:smtchecker abstract-function-nondet
-	function function5() public pure {
+	function function6() public pure {
 	}
 
 	/*
