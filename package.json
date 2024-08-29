@@ -12,6 +12,7 @@
 	"devDependencies": {
 		"@nomicfoundation/hardhat-toolbox": "^5.0.0",
 		"hardhat": "^2.22.8",
+		"hardhat-gas-reporter": "^1.0.10",
 		"hardhat-preprocessor": "^0.1.5"
 	}
 }

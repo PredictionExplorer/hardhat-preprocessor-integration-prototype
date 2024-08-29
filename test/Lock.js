@@ -123,4 +123,19 @@ describe("Lock", function () {
       });
     });
   });
+
+  describe("Gas report test 1", function () {
+    describe("Gas report test 1.1", function () {
+      it("Gas report test 1.1.1", async function () {
+        const { lock /* , unlockTime */ } = await loadFixture(
+          deployOneYearLockFixture
+        );
+
+        // // Transactions are sent using the first signer by default
+        // await time.increaseTo(unlockTime);
+
+        await expect(lock.function2()).not.to.be.reverted;
+      });
+    });
+  });
 });
