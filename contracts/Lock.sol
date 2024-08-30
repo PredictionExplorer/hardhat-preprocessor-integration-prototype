@@ -6,7 +6,7 @@ import { AssertionsHelpers } from "./libraries/AssertionsHelpers.sol";
 
 /*
 // Comment-202408174 applies.
-// #enableAssertions import "hardhat/console.sol";
+// #enable_assertions import "hardhat/console.sol";
 */
 
 contract Lock {
@@ -42,10 +42,10 @@ contract Lock {
 	// #endregion
 	// #region SMTChecker Prototyping
 
-	// #enableAssertions // #enableSMTChecker /// @notice This function will be uncommented if both assertions and SMTChecker are enabled.
-	// #enableAssertions // #enableSMTChecker function function1() public pure returns (uint) {
-	// #enableAssertions // #enableSMTChecker 	return 5;
-	// #enableAssertions // #enableSMTChecker }
+	// #enable_assertions // #enable_smtchecker /// @notice This function will be uncommented if both assertions and SMTChecker are enabled.
+	// #enable_assertions // #enable_smtchecker function function1() public pure returns (uint) {
+	// #enable_assertions // #enable_smtchecker 	return 5;
+	// #enable_assertions // #enable_smtchecker }
 
 	function badMax(uint256[] memory a) public pure returns (uint256) {
 		uint256 m = type(uint256).min;
@@ -54,8 +54,8 @@ contract Lock {
 			if (a[i] > m)
 				m = a[i];
 
-		// #enableAssertions for ( uint256 i = 0; i < a.length; ++ i )
-		// #enableAssertions 	assert(m >= a[i]);
+		// #enable_assertions for ( uint256 i = 0; i < a.length; ++ i )
+		// #enable_assertions 	assert(m >= a[i]);
 
 		return m;
 	}
@@ -74,11 +74,11 @@ contract Lock {
 		unchecked { return x * 42; }
 	}
 
-	// #enableSMTChecker /// @notice This function exists solely for SMTChecker to analyze.
-	// #enableSMTChecker function testBadMonotonicFunction2(uint256 a, uint256 b) public pure {
-	// #enableSMTChecker 	require(b > a);
-	// #enableSMTChecker 	assert(badMonotonicFunction2(b) > badMonotonicFunction2(a));
-	// #enableSMTChecker }
+	// #enable_smtchecker /// @notice This function exists solely for SMTChecker to analyze.
+	// #enable_smtchecker function testBadMonotonicFunction2(uint256 a, uint256 b) public pure {
+	// #enable_smtchecker 	require(b > a);
+	// #enable_smtchecker 	assert(badMonotonicFunction2(b) > badMonotonicFunction2(a));
+	// #enable_smtchecker }
 
 	/// @notice This demonstrates how to avoid the ugliness of commented out code.
 	/// The compiler will optimize out unused local variables.
@@ -111,8 +111,8 @@ contract Lock {
 
 	function function4() public view {
 		// This kind of notation would be incorrect if we disable Hardhat Preprocessor.
-		// #enableAssertions assert
-		// #disableAssertions require
+		// #enable_assertions assert
+		// #disable_assertions require
 			(owner != address(0));
 
 /*
@@ -121,15 +121,15 @@ contract Lock {
 		// So we can log something if assertions are enabled.
 		// But I have commented this out for now because the console code takes long for SMTChecker to analyze.
 		// [/Comment-202408174]
-		// #enableAssertions console.log(unlockTime);
+		// #enable_assertions console.log(unlockTime);
 */
 	}
 
-	// #disableSMTChecker /*
+	// #disable_smtchecker /*
 	/// @notice Hardhat Preprocessor can comment out this function.
 	function function5() public pure {
 	}
-	// #disableSMTChecker */
+	// #disable_smtchecker */
 
 	/// @notice See https://docs.soliditylang.org/en/latest/smtchecker.html#natspec-function-abstraction
 	/// @custom:smtchecker abstract-function-nondet

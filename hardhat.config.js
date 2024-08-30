@@ -7,26 +7,26 @@
 
 // You might want to disable this when deploying to the mainnet.
 // Doing so will eliminate the risk that Hardhat Preprocessor bugs will break things.
-// Obviously, our code will need to be designed to not require any preprocessing.
+// Obviously, our code must be designed to not require any preprocessing.
 // Comment-202408155 relates.
-// todo-0 Should we take this from an environmemt variable?
-const enableHardhatPreProcessor = true;
+const ENABLE_HARDHAT_PREPROCESSOR = parseBooleanEnvironmentVariable("ENABLE_HARDHAT_PREPROCESSOR", false);
 
 // Remember to disable this in the production code.
 // Comment-202408156 relates.
 // [Comment-202408155]
-// This is ignored when `! enableHardhatPreProcessor`.
+// This is ignored when `! ENABLE_HARDHAT_PREPROCESSOR`.
 // [/Comment-202408155]
-// todo-0 Should we take this from an environmemt variable?
-const enableAssertions = true;
+const ENABLE_ASSERTIONS = parseBooleanEnvironmentVariable("ENABLE_ASSERTIONS", false);
 
 // [Comment-202408156]
 // When enabling SMTChecker, you typically need to enable assertions as well.
 // [/Comment-202408156]
 // Comment-202408155 applies.
 // Comment-202408173 relates.
-// todo-0 Should we take this from an environmemt variable?
-const enableSMTChecker = true;
+const ENABLE_SMTCHECKER = parseBooleanEnvironmentVariable("ENABLE_SMTCHECKER", false);
+
+// #endregion
+// #region
 
 // Issue. Hardhat would automatically install solcjs, but solcjs fails to execute SMTChecker.
 // It could be a solcjs bug.
@@ -46,28 +46,52 @@ const solidityCompilerLongVersion = solidityVersion + "+commit.8a97fa7a.Linux.g+
 // #endregion
 // #region
 
-if (enableHardhatPreProcessor) {
+if (ENABLE_HARDHAT_PREPROCESSOR) {
 	console.warn("Warning. Hardhat Preprocessor is enabled. Assuming it's intentional.");
 
-	if (enableSMTChecker && ( ! enableAssertions )) {
+	if (ENABLE_SMTCHECKER && ( ! ENABLE_ASSERTIONS )) {
 		console.warn("Warning. SMTChecker is enabled, but assertions are not. Is it intentional?");
 	}
 } else {
 	console.warn("Warning. Hardhat Preprocessor is disabled. Assuming it's intentional.");
 }
 
-console.warn(`Warning. Make sure "${solidityCompilerPath}" version is "${solidityCompilerLongVersion}".`);
+console.warn(`Warning. Make sure "${solidityCompilerPath}" version is "${solidityCompilerLongVersion}". Hardhat will not necesarily validate that.`);
 
 // #endregion
 // #region
 
 require("@nomicfoundation/hardhat-toolbox");
-require("hardhat-gas-reporter");
 const { subtask } = require("hardhat/config");
 const { TASK_COMPILE_SOLIDITY_GET_SOLC_BUILD, } = require("hardhat/builtin-tasks/task-names");
 
-if (enableHardhatPreProcessor) {
+if (ENABLE_HARDHAT_PREPROCESSOR) {
 	require("hardhat-preprocessor");
+}
+
+// #endregion
+// #region
+
+/**
+ * todo-0 In the production, try to move this to a designated file.
+ * @param {string} environmentVariableName
+ * @param {boolean} defaultValue
+ * @returns {boolean}
+ * @throws {Error}
+ */
+function parseBooleanEnvironmentVariable(environmentVariableName, defaultValue) {
+	const rawValue = process.env[environmentVariableName];
+
+	switch (rawValue) {
+		case undefined:
+			return defaultValue;
+		case "true":
+			return true;
+		case "false":
+			return false;
+		default:
+			throw new Error(`Invalid value for environment variable ${environmentVariableName}: "${rawValue}". Expected "true" or "false".`);
+	}
 }
 
 // #endregion
@@ -138,13 +162,13 @@ subtask(
 
 {
 	const regExpPatternPart1 =
-		// "enableAssertions";
-		// "enableSMTChecker";
-		"enableAssertions|enableSMTChecker";
+		// "enable_assertions";
+		// "enable_smtchecker";
+		"enable_assertions|enable_smtchecker";
 	const regExpPatternPart2 = `\\/\\/[ \\t]*\\#(?:${regExpPatternPart1})(?: |\\b)`;
 	const regExpPattern = `^([ \\t]*)${regExpPatternPart2}(?:[ \\t]*${regExpPatternPart2})*`;
 	const regExp = new RegExp(regExpPattern, "s");
-	let str = "\t\t// #enableAssertions // #enableAssertions // #enableSMTChecker//#enableAssertions  \t  //  \t  #enableSMTChecker \t\treturn 5;";
+	let str = "\t\t// #enable_assertions // #enable_assertions // #enable_smtchecker//#enable_assertions  \t  //  \t  #enable_smtchecker \t\treturn 5;";
 	str = str.replace(regExp, "[$1]");
 	console.log(str);
 }
@@ -152,14 +176,14 @@ subtask(
 // #endregion
 // #region
 
-const solidityLinePreProcessingRegExp = enableHardhatPreProcessor ? createSolidityLinePreProcessingRegExp() : undefined;
+const solidityLinePreProcessingRegExp = ENABLE_HARDHAT_PREPROCESSOR ? createSolidityLinePreProcessingRegExp() : undefined;
 
 function createSolidityLinePreProcessingRegExp()
 {
 	const regExpPatternPart1 =
-		(enableAssertions ? "enableAssertions" : "disableAssertions") +
+		(ENABLE_ASSERTIONS ? "enable_assertions" : "disable_assertions") +
 		"|" +
-		(enableSMTChecker ? "enableSMTChecker" : "disableSMTChecker");
+		(ENABLE_SMTCHECKER ? "enable_smtchecker" : "disable_smtchecker");
 	const regExpPatternPart2 = `\\/\\/[ \\t]*\\#(?:${regExpPatternPart1})(?: |\\b)`;
 	const regExpPattern = `^([ \\t]*)${regExpPatternPart2}(?:[ \\t]*${regExpPatternPart2})*`;
 	const regExp = new RegExp(regExpPattern, "s");
@@ -176,7 +200,7 @@ function createSolidityLinePreProcessingRegExp()
 function preProcessSolidityLine(hre, line) {
 	// todo-0 In the production project, try to execute this validation before the preprocessor gets a chance to run.
 	// todo-0 But maybe do nothing if the preprocessor is disabled.
-	// if (enableAssertions || enableSMTChecker)
+	// if (ENABLE_ASSERTIONS || ENABLE_SMTCHECKER)
 	{
 		populateIsDeployingContractsToMainNetOnce(hre);
 
@@ -188,7 +212,7 @@ function preProcessSolidityLine(hre, line) {
 	}
 
 	// if (line.length <= 0) {
-	// 	line = line + `// ${hre.network.name} ${enableAssertions} ${enableSMTChecker}`;
+	// 	line = line + `// ${hre.network.name} ${ENABLE_ASSERTIONS} ${ENABLE_SMTCHECKER}`;
 	// }
 
 	// @ts-ignore No overload matches this call.
@@ -258,8 +282,8 @@ function preProcessSolidityLine(hre, line) {
 						// Otherwise, if the preprocessor generats a different output, Hardhat will recompile the changed contracts.
 						settings:
 						{
-							enableAssertions: enableAssertions,
-							enableSMTChecker: enableSMTChecker,
+							enableAssertions: ENABLE_ASSERTIONS,
+							enableSMTChecker: ENABLE_SMTCHECKER,
 						},
 
 						// // This undocumented parameter appears to make it possible to specify what files to preprocess.
@@ -294,14 +318,17 @@ function preProcessSolidityLine(hre, line) {
 			reportPureAndViewMethods: true,
 
 			excludeAutoGeneratedGetters: false,
-			// trackGasDeltas: process.env.GAS_GOLF === "true",
+
+			// Issue. What exactly is this?
+			trackGasDeltas: parseBooleanEnvironmentVariable("GAS_GOLF", false),
+
 			showMethodSig: true,
 			L1:
 				"ethereum",
 				// "moonbeam",
 			// L2: "arbitrum",
 
-			// Issue. This is supposed to be fetched automatically, but it's not happening.
+			// Issue. This is supposed to be fetched automatically, but for some reason it's not happening.
 			gasPrice: 1.221,
 
 			currency: 'USD',
@@ -320,13 +347,13 @@ function preProcessSolidityLine(hre, line) {
 			// forceTerminalOutputFormat: "terminal",
 			noColors: true,
 			// darkMode: true,
-		}
+		},
 	};
 
 	// #endregion
 	// #region
 
-	if (enableSMTChecker) {
+	if (ENABLE_SMTCHECKER) {
 		// See https://docs.soliditylang.org/en/latest/using-the-compiler.html#compiler-input-and-output-json-description
 		// On that page, find: modelChecker
 		// @ts-ignore Property is possibly undefined. Property doesn't exist.
@@ -358,7 +385,6 @@ function preProcessSolidityLine(hre, line) {
 			// we are calling into potentially malicious code.
 			// This parameter results in SMTChecker assuming that we are calling our own known contract.
 			// This implies that for this to work correct we must cast an address to a specific contract, rather than to its interface.
-			// todo-0 So maybe we don't actually need to bother with defining intefaces.
 			// A problem is that we make a lot of low level calls, like `call` or `delegatecall`, but SMTChecker doesn't recognize those.
 			// So it would be beneficial at least in the mode in which SMTChecker is enabled to make high level calls.
 			// See https://docs.soliditylang.org/en/latest/smtchecker.html#trusted-external-calls
@@ -400,7 +426,7 @@ function preProcessSolidityLine(hre, line) {
 			],
 
 			// Milliseconds.
-			timeout: 9999 * 1000,
+			timeout: 5 * 60 * 60 * 1000,
 		};
 	}
 
