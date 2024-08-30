@@ -277,9 +277,9 @@ function preProcessSolidityLine(hre, line) {
 		},
 
 		gasReporter: {
-			enabled:
-				// process.env["REPORT_GAS"] ? true : false,
-				true,
+			// // Hardhat will set this based on the `REPORT_GAS` environment variable.
+			// enabled: true,
+
 			// offline: true,
 			// excludeContracts: [ "MyContract" ],
 
@@ -336,6 +336,7 @@ function preProcessSolidityLine(hre, line) {
 			// [Comment-202408173]
 			// Issue. Even if you select only some contracts here, we will still preprocess all Solidity sources.
 			// [/Comment-202408173]
+			// See https://docs.soliditylang.org/en/latest/smtchecker.html#verified-contracts
 			contracts: {
 				// "contracts/Source1.sol": ["Contract1"],
 				// "contracts/Source2.sol": ["Contract2", "Contract3"],
