@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.26;
 
-import { AssertionsHelpers } from "./libraries/AssertionsHelpers.sol";
+import { ErrorHandlingHelpers } from "./libraries/ErrorHandlingHelpers.sol";
 
 /*
 // Comment-202408174 applies.
-// #enable_assertions import "hardhat/console.sol";
+// #enable_asserts import "hardhat/console.sol";
 */
 
 contract Lock {
@@ -42,10 +42,10 @@ contract Lock {
 	// #endregion
 	// #region SMTChecker Prototyping
 
-	// #enable_assertions // #enable_smtchecker /// @notice This function will be uncommented if both assertions and SMTChecker are enabled.
-	// #enable_assertions // #enable_smtchecker function function1() public pure returns (uint) {
-	// #enable_assertions // #enable_smtchecker 	return 5;
-	// #enable_assertions // #enable_smtchecker }
+	// #enable_asserts // #enable_smtchecker /// @notice This function will be uncommented if both asserts and SMTChecker are enabled.
+	// #enable_asserts // #enable_smtchecker function function1() public pure returns (uint) {
+	// #enable_asserts // #enable_smtchecker 	return 5;
+	// #enable_asserts // #enable_smtchecker }
 
 	function badMax(uint256[] memory a) public pure returns (uint256) {
 		uint256 m = type(uint256).min;
@@ -54,8 +54,8 @@ contract Lock {
 			if (a[i] > m)
 				m = a[i];
 
-		// #enable_assertions for ( uint256 i = 0; i < a.length; ++ i )
-		// #enable_assertions 	assert(m >= a[i]);
+		// #enable_asserts for ( uint256 i = 0; i < a.length; ++ i )
+		// #enable_asserts 	assert(m >= a[i]);
 
 		return m;
 	}
@@ -88,13 +88,13 @@ contract Lock {
 	function function2() external returns (uint256) {
 		uint256 unlockTimeCopy;
 
-		if(AssertionsHelpers.ENABLE_ASSERTIONS) {
+		if(ErrorHandlingHelpers.ENABLE_ASSERTS) {
 			unlockTimeCopy = unlockTime;
 		}
 
 		unchecked { unlockTime += block.timestamp; }
 
-		if(AssertionsHelpers.ENABLE_ASSERTIONS) {
+		if(ErrorHandlingHelpers.ENABLE_ASSERTS) {
 			// assert(unlockTimeCopy <= block.timestamp);
 			assert(unlockTimeCopy > block.timestamp);
 			unlockTimeCopy = unlockTime;
@@ -102,7 +102,7 @@ contract Lock {
 
 		++ unlockTime;
 
-		if(AssertionsHelpers.ENABLE_ASSERTIONS) {
+		if(ErrorHandlingHelpers.ENABLE_ASSERTS) {
 			assert(unlockTimeCopy > block.timestamp);
 		}
 
@@ -111,22 +111,24 @@ contract Lock {
 
 	function function4() public view {
 		// This kind of notation would be incorrect if we disable Hardhat Preprocessor.
-		// #enable_assertions assert
-		// #disable_assertions require
+		// #enable_asserts assert
+		// #disable_asserts require
 			(owner != address(0));
 
 /*
 		// [Comment-202408174]
-		// It makes sense to keep assertions enabled during development.
-		// So we can log something if assertions are enabled.
-		// But I have commented this out for now because the console code takes long for SMTChecker to analyze.
+		// It makes sense to keep asserts enabled during development.
+		// So we can log something if asserts are enabled.
+		// Issue. But I have commented this out for now because the console code takes long for SMTChecker to analyze.
+		// Therefore it would make sense to add a separate parameter to enable console.
 		// [/Comment-202408174]
-		// #enable_assertions console.log(unlockTime);
+		// #enable_asserts console.log(unlockTime);
 */
 	}
 
 	// #disable_smtchecker /*
 	/// @notice Hardhat Preprocessor can comment out this function.
+	/// But this solution requires that Hardhat Preprocessor was always enabled, even when deploying to a mainnet.
 	function function5() public pure {
 	}
 	// #disable_smtchecker */
