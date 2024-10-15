@@ -4,10 +4,12 @@ pragma solidity ^0.8.26;
 
 import { ErrorHandlingHelpers } from "./libraries/ErrorHandlingHelpers.sol";
 
-/*
-// Comment-202408174 applies.
-// #enable_asserts import "hardhat/console.sol";
-*/
+// [Comment-202408174]
+// It makes sense to keep asserts enabled during the development.
+// So we can log something if asserts are enabled.
+// In addition, we require that SMTChecker was disabled because it takes long for SMTChecker to analyze the console code.
+// [/Comment-202408174]
+// #enable_asserts // #disable_smtchecker import "hardhat/console.sol";
 
 contract Lock {
 	// #region Hardhat Generated Code
@@ -115,15 +117,8 @@ contract Lock {
 		// #disable_asserts require
 			(owner != address(0));
 
-/*
-		// [Comment-202408174]
-		// It makes sense to keep asserts enabled during development.
-		// So we can log something if asserts are enabled.
-		// Issue. But I have commented this out for now because the console code takes long for SMTChecker to analyze.
-		// Therefore it would make sense to add a separate parameter to enable console.
-		// [/Comment-202408174]
-		// #enable_asserts console.log(unlockTime);
-*/
+		// Comment-202408174 applies.
+		// #enable_asserts // #disable_smtchecker console.log(unlockTime);
 	}
 
 	// #disable_smtchecker /*
