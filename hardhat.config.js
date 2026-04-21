@@ -116,7 +116,7 @@ In the production code, I named this `populateNetworkIsMainNetOnce`.
 @param {import("hardhat/types").HardhatRuntimeEnvironment} hre
 */
 function populateIsDeployingContractsToMainNetOnce(hre) {
-	if(isDeployingContractsToMainNet != undefined) {
+	if(isDeployingContractsToMainNet !== undefined) {
 		return;
 	}
 
